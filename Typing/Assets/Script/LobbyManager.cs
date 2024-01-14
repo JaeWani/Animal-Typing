@@ -3,73 +3,94 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class LobbyManager : MonoBehaviour
+public class LobbyManager : MonoBehaviourPunCallbacks
 {
     #region Variable
-    [Header("UI_RectTransform")]
-    [SerializeField] private RectTransform roomJoinPanelRect;
-    [SerializeField] private RectTransform roomMakingPanelRect;
+    [SerializeField] private InputField nickNameInputField;
 
+    [SerializeField] private Button joinButton;
+    [SerializeField] private Button nickNameEnterButton;
 
-    [Header("UI_Button")]
-    [SerializeField] private Button mainRoomJoinButton;
-    [SerializeField] private Button mainRoomMakingButton;
+    [SerializeField] private Text connectionInfoText;
 
-    [SerializeField] private Button roomJoinPlayerNameEnterButton;
-    [SerializeField] private Button roomJoinRoomNameEnterButton;
-    [SerializeField] private Button roomJoinTitleButton;
+    [SerializeField] private RectTransform nickNamePanel;
+    [SerializeField] private RectTransform roomJoinPanel;
 
-    [SerializeField] private Button roomMakingPlayerNameEnterButton;
-    [SerializeField] private Button roomMakingRoomNameEnterButton;
-    [SerializeField] private Button roomMakingTitleButton;
-
-    [Header("UI_InputField")]
-    [SerializeField] private InputField roomJoinPlayerNameInputField;
-    [SerializeField] private InputField roomJoinRoomNameInputField;
-    [SerializeField] private InputField roomMakingPlayerNameInputField;
-    [SerializeField] private InputField roomMakingRoomNameInputField;
-
+    bool isJoinRoom = false;
     #endregion
 
     private void Start()
     {
-        AddButtonsOnClick();
+        PhotonNetwork.ConnectUsingSettings();
+        joinButton.interactable = false;
+
+        joinButton.onClick.AddListener(() => Connect());
+        nickNameEnterButton.onClick.AddListener(() => NickNameEnter(nickNameInputField.text));
     }
 
-    private void Update()
+    public override void OnConnectedToMaster()
     {
-
+        connectionInfoText.text = "서버와 연결되었습니다.";
+        joinButton.interactable = true;
     }
-
-    private void AddButtonsOnClick()
+    public override void OnDisconnected(DisconnectCause cause)
     {
-        mainRoomJoinButton.onClick.AddListener(() => { roomJoinPanelRect.DOAnchorPosX(0, 1).SetEase(Ease.OutQuad); });
-        mainRoomMakingButton.onClick.AddListener(() => { roomMakingPanelRect.DOAnchorPosX(0, 1).SetEase(Ease.OutQuad); });
+        connectionInfoText.text = "연결이 끊겼습니다 !";
+        joinButton.interactable = false;
 
-        roomJoinTitleButton.onClick.AddListener(() => { roomJoinPanelRect.DOAnchorPosX(-2000, 1).SetEase(Ease.OutQuad); });
-        roomMakingTitleButton.onClick.AddListener(() => { roomMakingPanelRect.DOAnchorPosX(2000, 1).SetEase(Ease.OutQuad); });
-
-        roomJoinPlayerNameEnterButton.onClick.AddListener(() =>
-        {
-            if (!string.IsNullOrWhiteSpace(roomJoinPlayerNameInputField.text))
-            {
-                NetworkManager.SetPlayerName(roomJoinPlayerNameInputField.text);
-                roomJoinPlayerNameInputField.gameObject.SetActive(false);
-                roomJoinPlayerNameEnterButton.gameObject.SetActive(false);
-            }
-        });
-
-        roomMakingPlayerNameEnterButton.onClick.AddListener(() =>
-        {
-            if (!string.IsNullOrWhiteSpace(roomMakingPlayerNameInputField.text))
-            {
-                NetworkManager.SetPlayerName(roomMakingPlayerNameInputField.text);
-                roomMakingPlayerNameInputField.gameObject.SetActive(false);
-                roomMakingPlayerNameEnterButton.gameObject.SetActive(false);
-            }
-        });
-
-
+        PhotonNetwork.ConnectUsingSettings();
     }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        connectionInfoText.text = "다른 방이 존재하지 않아, 새로 방을 생성 중 입니다.";
+        PhotonNetwork.CreateRoom("", new RoomOptions { MaxPlayers = 2 });
+    }
+
+    public override void OnJoinedRoom()
+    {
+        connectionInfoText.text = "방에 참가 되었습니다 !";
+    }
+
+
+    public void Connect()
+    {
+        joinButton.interactable = false;
+        connectionInfoText.text = "랜덤 방에 참가중입니다 !";
+
+        if (PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.JoinRandomRoom();
+        }
+        else
+        {
+            PhotonNetwork.ConnectUsingSettings();
+        }
+    }
+    private void NickNameEnter(string nickName) 
+    {
+        if (!string.IsNullOrWhiteSpace(nickName)) 
+        {
+            nickNamePanel.DOAnchorPosX(2000,1).SetEase(Ease.OutQuad).OnComplete(() => 
+            {
+                roomJoinPanel.DOAnchorPosX(0, 1).SetEase(Ease.OutQuad);
+            });
+
+            PhotonNetwork.NickName = nickName;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (PhotonNetwork.CurrentRoom != null && !isJoinRoom && PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+        {
+
+            isJoinRoom = true;
+            PhotonNetwork.LoadLevel("In Game");
+        }
+    }
+
 }
