@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 
 public class NetworkManager : MonoBehaviourPunCallbacks
@@ -75,6 +76,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("Room Created!");
     }
-    
+    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+    {
+        Debug.Log("이새끼 나감");
+    }
+    public override void OnLeftRoom()
+    {
+        Debug.Log("방을 나갔습니다.");
+        SceneManager.LoadScene(0);
+    }
     #endregion
 }

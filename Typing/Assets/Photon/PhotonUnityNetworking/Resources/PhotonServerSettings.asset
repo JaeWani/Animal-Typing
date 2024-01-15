@@ -42,6 +42,16 @@ MonoBehaviour:
   - SetNickName
   - SetRandomAttackSentence
   - SetRandomAttackSentenceRPC
+  - ScoreAdd
+  - SetRandomHealWord
+  - SetRandomHealWordRPC
+  - Attack
+  - Heal
+  - Interference
+  - InterferenceRPC
+  - Stop
+  - SetRandomInterferenceWordRPC
+  - GameOver
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

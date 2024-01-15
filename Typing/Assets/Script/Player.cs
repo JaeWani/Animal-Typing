@@ -26,13 +26,25 @@ public class Player : MonoBehaviour
 
     private void Check()
     {
-        if (Input.GetKeyDown(KeyCode.A)) 
+        if (Input.GetKeyDown(KeyCode.Return))
         {
-            Debug.Log("키는 눌림");
             if (inputField.text == GameManager.instance.currentAttackSentence)
             {
-                Debug.Log("통과도 함");
-                GameManager.SetRandomAttackSentence(GameManager.instance.randomValue, GameManager.instance.photonView.GetInstanceID());
+                Debug.Log("공격");
+                GameManager.NextAttackSentence(GameManager.instance.randomAttackValue, GameManager.instance.photonView.GetInstanceID(), currentState);
+                inputField.text = null;
+            }
+            else if (inputField.text == GameManager.instance.currentHealWord)
+            {
+                Debug.Log("힐");
+                GameManager.NextHealWord(GameManager.instance.randomHealValue, GameManager.instance.photonView.GetInstanceID(), currentState);
+                inputField.text = null;
+            }
+            else if (inputField.text == GameManager.instance.currentInterferenceWord)
+            {
+                Debug.Log("방해");
+                GameManager.NextInterference(GameManager.instance.randomInterference, GameManager.instance.photonView.GetInstanceID());
+                inputField.text = null;
             }
         }
     }
