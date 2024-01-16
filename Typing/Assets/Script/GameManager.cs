@@ -34,7 +34,24 @@ public class GameManager : MonoBehaviourPun
     [SerializeField] private Text text_1, text_2;
 
     [Header("In Game System")]
-    public int player_1_Score = 3, player_2_Score = 3;
+    private int Player_1_Score = 3;
+    private int Player_2_Score = 3;
+    public int player_1_Score
+    {
+        get { return Player_1_Score; }
+        set
+        {
+            Player_1_Score = value;
+        }
+    }
+    public int player_2_Score
+    {
+        get { return Player_2_Score; }
+        set 
+        { 
+            Player_2_Score = value;
+        }
+    }
 
     public float interferenceTime = 1.5f;
     public bool isInterference = false;
@@ -56,6 +73,12 @@ public class GameManager : MonoBehaviourPun
 
     [SerializeField] private GameObject winObject;
     [SerializeField] private GameObject loseObject;
+
+    public List<Sprite> leftHPbarSprites = new List<Sprite>();
+    public List<Sprite> rightHPbarSprites = new List<Sprite>();
+
+    public Image left_HPbar;
+    public Image right_HPbar;
 
     public InputField inputField;
 
