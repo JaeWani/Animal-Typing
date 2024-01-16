@@ -29,6 +29,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
         joinButton.onClick.AddListener(() => Connect());
         nickNameEnterButton.onClick.AddListener(() => NickNameEnter(nickNameInputField.text));
+
+        if (PhotonNetwork.IsConnected)
+        {
+            connectionInfoText.text = "서버와 연결되었습니다.";
+            joinButton.interactable = true;
+        }
     }
 
     public override void OnConnectedToMaster()
@@ -46,7 +52,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        connectionInfoText.text = "다른 방이 존재하지 않아, 새로 방을 생성 중 입니다.";
+        connectionInfoText.text = "다른 방이 존재하지 않아, \n 새로 방을 생성 중 입니다.";
         PhotonNetwork.CreateRoom("", new RoomOptions { MaxPlayers = 2 });
     }
 

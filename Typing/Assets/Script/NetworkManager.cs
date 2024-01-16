@@ -83,7 +83,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("방을 나갔습니다.");
-        SceneManager.LoadScene(0);
     }
     #endregion
 }

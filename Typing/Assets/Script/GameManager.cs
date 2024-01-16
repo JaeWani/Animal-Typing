@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Photon.Realtime;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 public enum PlayerState
 {
@@ -49,10 +50,21 @@ public class GameManager : MonoBehaviourPun
 
     [SerializeField] private Image interferenceImage;
 
+    [SerializeField] private Button titleButton;
+
+    [SerializeField] private RectTransform gameOverPanel;
+
+    [SerializeField] private GameObject winObject;
+    [SerializeField] private GameObject loseObject;
+
     public InputField inputField;
 
     [Header("Photon Player")]
     public string Player_1_Name, Player_2_Name;
+
+    public Player player;
+
+    private PlayerState playerState;
 
     [Header("Sentence , Word")]
     public List<string> attackSentences = new List<string>();
@@ -87,6 +99,12 @@ public class GameManager : MonoBehaviourPun
         text_1.text = Player_1_Name;
         text_2.text = Player_2_Name;
 
+        titleButton.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene(1);
+        });
+        if (PhotonNetwork.IsMasterClient) playerState = PlayerState.Master;
+        else playerState = PlayerState.User;
     }
 
     private void Update()
@@ -105,8 +123,8 @@ public class GameManager : MonoBehaviourPun
     {
         foreach (var item in PhotonNetwork.PlayerList)
         {
-            if (item.IsMasterClient) Player_1_Name = item.NickName + " /  Master";
-            else Player_2_Name = item.NickName + " /  User";
+            if (item.IsMasterClient) Player_1_Name = item.NickName;
+            else Player_2_Name = item.NickName;
         }
     }
 
@@ -160,16 +178,19 @@ public class GameManager : MonoBehaviourPun
     {
         SetRandomAttackSentence(index, instanceID);
         instance.photonView.RPC("Attack", RpcTarget.All, playerState);
+        instance.inputField.ActivateInputField();
     }
     public static void NextHealWord(int index, int instanceID, PlayerState playerState)
     {
         SetRandomHealWord(index, instanceID);
         instance.photonView.RPC("Heal", RpcTarget.All, playerState);
+        instance.inputField.ActivateInputField();
     }
     public static void NextInterference(int index, int instanceID)
     {
         SetRandomInterference(index, instanceID);
         instance.Interference();
+        instance.inputField.ActivateInputField();
     }
 
     [PunRPC]
@@ -210,6 +231,30 @@ public class GameManager : MonoBehaviourPun
         {
             PhotonNetwork.LeaveRoom();
             isGameOver = true;
+            gameOverPanel.DOAnchorPosY(0, 1f).SetEase(Ease.OutQuad);
+            if (playerState == PlayerState.Master && player_1_Score <= 0)
+            {
+                Debug.Log("Master Lose");
+                loseObject.SetActive(true);
+                winObject.SetActive(false);
+            }
+            else if (playerState == PlayerState.Master && player_2_Score <= 0)
+            {
+                Debug.Log("Master Win");
+                winObject.SetActive(true);
+                loseObject.SetActive(false);
+            }
+            else if (playerState == PlayerState.User && player_1_Score <= 0)
+            {
+                Debug.Log("User Win");
+                winObject.SetActive(true);
+                loseObject.SetActive(false);
+            }
+            else if (playerState == PlayerState.User && player_2_Score <= 0)
+            {
+                winObject.SetActive(false);
+                loseObject.SetActive(true);
+            }
         }
     }
 }
