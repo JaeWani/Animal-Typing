@@ -22,6 +22,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public Character currentCharacter;
 
     #endregion
 

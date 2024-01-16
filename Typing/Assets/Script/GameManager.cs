@@ -36,20 +36,25 @@ public class GameManager : MonoBehaviourPun
     [Header("In Game System")]
     private int Player_1_Score = 3;
     private int Player_2_Score = 3;
+
+    public Character character;
+
     public int player_1_Score
     {
         get { return Player_1_Score; }
         set
         {
             Player_1_Score = value;
+            SetPlayer_1_HPBar();
         }
     }
     public int player_2_Score
     {
         get { return Player_2_Score; }
-        set 
-        { 
+        set
+        {
             Player_2_Score = value;
+            SetPlayer_2_HPBar();
         }
     }
 
@@ -87,7 +92,7 @@ public class GameManager : MonoBehaviourPun
 
     public Player player;
 
-    private PlayerState playerState;
+    public PlayerState playerState;
 
     [Header("Sentence , Word")]
     public List<string> attackSentences = new List<string>();
@@ -128,6 +133,10 @@ public class GameManager : MonoBehaviourPun
         });
         if (PhotonNetwork.IsMasterClient) playerState = PlayerState.Master;
         else playerState = PlayerState.User;
+
+        character = NetworkManager.instance.currentCharacter;
+
+        CreateCharacter();
     }
 
     private void Update()
@@ -139,6 +148,11 @@ public class GameManager : MonoBehaviourPun
         MasterScoreText.text = player_1_Score.ToString();
         UserScoreText.text = player_2_Score.ToString();
         if (player_1_Score <= 0 || player_2_Score <= 0) photonView.RPC("GameOver", RpcTarget.All);
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            CameraShake(Camera.main.transform, 0.1f, 0.1f);
+        }
     }
 
     [PunRPC]
@@ -278,6 +292,52 @@ public class GameManager : MonoBehaviourPun
                 winObject.SetActive(false);
                 loseObject.SetActive(true);
             }
+        }
+    }
+    public void SetPlayer_1_HPBar()
+    {
+        if (Player_1_Score == 3) left_HPbar.sprite = leftHPbarSprites[3];
+        else if (Player_1_Score == 2) left_HPbar.sprite = leftHPbarSprites[2];
+        else if (Player_1_Score == 1) left_HPbar.sprite = leftHPbarSprites[1];
+        else if (Player_1_Score == 0) left_HPbar.sprite = leftHPbarSprites[0];
+    }
+    public void SetPlayer_2_HPBar()
+    {
+        if (Player_2_Score == 3) right_HPbar.sprite = rightHPbarSprites[3];
+        else if (Player_2_Score == 2) right_HPbar.sprite = rightHPbarSprites[2];
+        else if (Player_2_Score == 1) right_HPbar.sprite = rightHPbarSprites[1];
+        else if (Player_2_Score == 0) right_HPbar.sprite = rightHPbarSprites[0];
+    }
+    public void CameraShake(Transform transform, float duration, float magnitude)
+    {
+        StartCoroutine(_CameraShake(duration, magnitude));
+        IEnumerator _CameraShake(float duration, float magnitude)
+        {
+            Vector3 startPos = transform.position;
+
+            float time = 0;
+
+            while (time <= duration) 
+            {
+                transform.localPosition = Random.insideUnitSphere * magnitude + startPos;
+                time += Time.deltaTime;
+
+                yield return null;
+            }
+            transform.localPosition = startPos;
+        }
+    }
+    public void CreateCharacter() 
+    {
+        Vector3 pos;
+        if(playerState == PlayerState.Master) pos = new Vector3(-50,1.3f,0);
+        else pos = new Vector3(50, 0, 0);
+        switch (character)
+        {
+            case Character.AKA: PhotonNetwork.Instantiate("A K A. AKA", pos,Quaternion.identity); break;
+            case Character.NoAlLa: PhotonNetwork.Instantiate("No al la", pos, Quaternion.identity); break;
+            case Character.Frogy: PhotonNetwork.Instantiate("Frogy", pos, Quaternion.identity); break;
+            case Character.Tusoteuthis: PhotonNetwork.Instantiate("Tusoteuthis", pos, Quaternion.identity); break;
         }
     }
 }

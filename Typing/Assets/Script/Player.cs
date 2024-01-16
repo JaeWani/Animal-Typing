@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
+            inputField.ActivateInputField();
             if (inputField.text == GameManager.instance.currentAttackSentence)
             {
                 Debug.Log("АјАн");

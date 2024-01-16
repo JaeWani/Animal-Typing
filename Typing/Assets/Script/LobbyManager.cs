@@ -6,6 +6,13 @@ using DG.Tweening;
 using Photon.Pun;
 using Photon.Realtime;
 
+public enum Character
+{
+    AKA,
+    NoAlLa,
+    Frogy,
+    Tusoteuthis
+}
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
     #region Variable
@@ -19,6 +26,15 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [SerializeField] private RectTransform nickNamePanel;
     [SerializeField] private RectTransform roomJoinPanel;
 
+    [SerializeField] private Button leftArrowButton;
+    [SerializeField] private Button rightArrowButton;
+
+    [SerializeField] private Image characterSelectImage;
+
+    [SerializeField] private List<Sprite> animalSprites = new List<Sprite>();
+
+    [SerializeField] private Character currentCharacter = Character.AKA;
+
     bool isJoinRoom = false;
     #endregion
 
@@ -27,8 +43,35 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
         joinButton.interactable = false;
 
-        joinButton.onClick.AddListener(() => Connect());
-        nickNameEnterButton.onClick.AddListener(() => NickNameEnter(nickNameInputField.text));
+        joinButton.onClick.AddListener(() =>
+        {
+            Connect();
+            NetworkManager.instance.currentCharacter = currentCharacter;
+            SoundManager.PlaySound("Button_Sound", 1, false);
+        });
+        nickNameEnterButton.onClick.AddListener(() =>
+        {
+            NickNameEnter(nickNameInputField.text);
+            SoundManager.PlaySound("Button_Sound", 1, false);
+        });
+
+        leftArrowButton.onClick.AddListener(() =>
+        {
+            int a = (int)currentCharacter;
+            if (a - 1 < 0) a = 3;
+            else a--;
+            currentCharacter = (Character)a;
+            characterSelectImage.sprite = animalSprites[(int)currentCharacter];
+        });
+
+        rightArrowButton.onClick.AddListener(() => 
+        {
+            int a = (int)currentCharacter;
+            if (a + 1 > 3) a = 0;
+            else a++;
+            currentCharacter = (Character)a;
+            characterSelectImage.sprite = animalSprites[(int)currentCharacter];
+        });
 
         if (PhotonNetwork.IsConnected)
         {
@@ -76,14 +119,14 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             PhotonNetwork.ConnectUsingSettings();
         }
     }
-    private void NickNameEnter(string nickName) 
+    private void NickNameEnter(string nickName)
     {
-        if (!string.IsNullOrWhiteSpace(nickName)) 
+        if (!string.IsNullOrWhiteSpace(nickName))
         {
-            nickNamePanel.DOAnchorPosX(2000,1).SetEase(Ease.OutQuad).OnComplete(() => 
-            {
-                roomJoinPanel.DOAnchorPosX(0, 1).SetEase(Ease.OutQuad);
-            });
+            nickNamePanel.DOAnchorPosX(2000, 1).SetEase(Ease.OutQuad).OnComplete(() =>
+             {
+                 roomJoinPanel.DOAnchorPosX(0, 1).SetEase(Ease.OutQuad);
+             });
 
             PhotonNetwork.NickName = nickName;
         }

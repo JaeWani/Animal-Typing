@@ -19,18 +19,22 @@ public class TitleManager : MonoBehaviour
         startButton.onClick.AddListener(() =>
         {
             UIs.SetActive(false);
+            SoundManager.PlaySound("Button_Sound",1,false);
             SceneManager.LoadScene(1);
         });
 
         ruleButton.onClick.AddListener(() =>
         {
-
+            SoundManager.PlaySound("Button_Sound", 1, false);
         });
 
         quitButton.onClick.AddListener(() =>
         {
+            SoundManager.PlaySound("Button_Sound", 1, false);
             Application.Quit();
         });
+
+        SoundManager.PlaySound("Title_Bgm", 1, true);
     }
 
     // Update is called once per frame
