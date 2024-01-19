@@ -24,6 +24,9 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public Character currentCharacter;
 
+    public Character player_1_Character;
+    public Character player_2_Character;
+
     #endregion
 
     #region Unity_Function
@@ -70,6 +73,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("Room Joined!");
+        check();
     }
 
 
@@ -84,6 +88,18 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         Debug.Log("방을 나갔습니다.");
+    }
+
+    public static void check() => instance.CheckPlayerCharacter();
+    public void CheckPlayerCharacter()
+    {
+
+        NetworkManager.instance.player_1_Character = (Character)PhotonNetwork.MasterClient.CustomProperties["icon"];
+        foreach (var item in PhotonNetwork.PlayerList)
+        {
+            if (!PhotonNetwork.IsMasterClient)
+                NetworkManager.instance.player_2_Character = (Character)item.CustomProperties["icon"];
+        }
     }
     #endregion
 }

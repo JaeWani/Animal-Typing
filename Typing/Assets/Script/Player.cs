@@ -28,11 +28,11 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            inputField.ActivateInputField();
             if (inputField.text == GameManager.instance.currentAttackSentence)
             {
                 Debug.Log("АјАн");
                 GameManager.NextAttackSentence(GameManager.instance.randomAttackValue, GameManager.instance.photonView.GetInstanceID(), currentState);
+
                 inputField.text = null;
             }
             else if (inputField.text == GameManager.instance.currentHealWord)

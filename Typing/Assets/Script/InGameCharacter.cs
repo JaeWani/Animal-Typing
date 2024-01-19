@@ -8,10 +8,13 @@ using Photon.Realtime;
 public class InGameCharacter : MonoBehaviour
 {
     private SpriteRenderer spriteRenderer;
+    public bool isMaster = false;
     
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (isMaster) transform.DOLocalMoveX(-6,1).SetEase(Ease.OutQuad);
+        else transform.DOLocalMoveX(6, 1).SetEase(Ease.OutQuad);
 
     }
 

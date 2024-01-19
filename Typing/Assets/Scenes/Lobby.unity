@@ -771,6 +771,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerNickName: 
   currentCharacter: 0
+  player_1_Character: 0
+  player_2_Character: 0
 --- !u!1 &726060804
 GameObject:
   m_ObjectHideFlags: 0
@@ -1107,7 +1109,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\uC774\uB984 \uC801\uC5B4\uB77C \uAC8C\uC774\uC57C."
+  m_Text: "\uC774\uB984\uC744 \uC801\uC5B4\uC8FC\uC138\uC694"
 --- !u!222 &827731468
 CanvasRenderer:
   m_ObjectHideFlags: 0

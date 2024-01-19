@@ -52,6 +52,8 @@ MonoBehaviour:
   - Stop
   - SetRandomInterferenceWordRPC
   - GameOver
+  - ChangeCharacterImage
+  - CheckPlayerCharacter
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -79,11 +79,19 @@ public class GameManager : MonoBehaviourPun
     [SerializeField] private GameObject winObject;
     [SerializeField] private GameObject loseObject;
 
+    [SerializeField] private Image left_CharacterImage;
+    [SerializeField] private Image right_CharacterImage;
+
+   
+
     public List<Sprite> leftHPbarSprites = new List<Sprite>();
     public List<Sprite> rightHPbarSprites = new List<Sprite>();
 
     public Image left_HPbar;
     public Image right_HPbar;
+
+    public List<Sprite> animalSprites = new List<Sprite>();
+    public List<GameObject> animalPrefabs = new List<GameObject>();
 
     public InputField inputField;
 
@@ -134,9 +142,10 @@ public class GameManager : MonoBehaviourPun
         if (PhotonNetwork.IsMasterClient) playerState = PlayerState.Master;
         else playerState = PlayerState.User;
 
-        character = NetworkManager.instance.currentCharacter;
 
         CreateCharacter();
+        ImageSet();
+        inputField.ActivateInputField();
     }
 
     private void Update()
@@ -149,10 +158,7 @@ public class GameManager : MonoBehaviourPun
         UserScoreText.text = player_2_Score.ToString();
         if (player_1_Score <= 0 || player_2_Score <= 0) photonView.RPC("GameOver", RpcTarget.All);
 
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            CameraShake(Camera.main.transform, 0.1f, 0.1f);
-        }
+
     }
 
     [PunRPC]
@@ -202,19 +208,19 @@ public class GameManager : MonoBehaviourPun
     [PunRPC]
     public void SetRandomHealWordRPC(int index)
     {
-        currentHealWord = healWords[index];
+        currentHealWord = interferenceWords[index];
     }
 
     [PunRPC]
     public void SetRandomInterferenceWordRPC(int index)
     {
-        currentInterferenceWord = interferenceWords[index];
+        currentInterferenceWord = healWords[index];
     }
 
     public static void NextAttackSentence(int index, int instanceID, PlayerState playerState)
     {
         SetRandomAttackSentence(index, instanceID);
-        instance.photonView.RPC("Attack", RpcTarget.All, playerState);
+        instance.photonView.RPC("Attack", RpcTarget.Others);
         instance.inputField.ActivateInputField();
     }
     public static void NextHealWord(int index, int instanceID, PlayerState playerState)
@@ -231,10 +237,12 @@ public class GameManager : MonoBehaviourPun
     }
 
     [PunRPC]
-    public void Attack(PlayerState playerState)
+    public void Attack()
     {
-        if (playerState == PlayerState.Master) player_2_Score--;
-        else player_1_Score--;
+        SoundManager.PlaySound("Hit_Sound", 10, false);
+        CameraShake_(0.5f, 0.1f);
+        if (PhotonNetwork.IsMasterClient) player_1_Score--;
+        else player_2_Score--;
     }
 
     [PunRPC]
@@ -245,6 +253,7 @@ public class GameManager : MonoBehaviourPun
     }
     public void Interference()
     {
+        SoundManager.PlaySound("Attack_Sound", 1, false);
         instance.photonView.RPC("InterferenceRPC", RpcTarget.Others);
     }
 
@@ -253,7 +262,7 @@ public class GameManager : MonoBehaviourPun
     {
         StopAllCoroutines();
         StartCoroutine(interference());
-
+        SoundManager.PlaySound("Interference_Sound", 1, false);
         IEnumerator interference()
         {
             interferenceImage.gameObject.SetActive(true);
@@ -308,6 +317,10 @@ public class GameManager : MonoBehaviourPun
         else if (Player_2_Score == 1) right_HPbar.sprite = rightHPbarSprites[1];
         else if (Player_2_Score == 0) right_HPbar.sprite = rightHPbarSprites[0];
     }
+    public void CameraShake_(float duration, float magnitude)
+    {
+        instance.CameraShake(Camera.main.transform, duration, magnitude);
+    }
     public void CameraShake(Transform transform, float duration, float magnitude)
     {
         StartCoroutine(_CameraShake(duration, magnitude));
@@ -317,7 +330,7 @@ public class GameManager : MonoBehaviourPun
 
             float time = 0;
 
-            while (time <= duration) 
+            while (time <= duration)
             {
                 transform.localPosition = Random.insideUnitSphere * magnitude + startPos;
                 time += Time.deltaTime;
@@ -327,17 +340,29 @@ public class GameManager : MonoBehaviourPun
             transform.localPosition = startPos;
         }
     }
-    public void CreateCharacter() 
+    public void CreateCharacter()
     {
-        Vector3 pos;
-        if(playerState == PlayerState.Master) pos = new Vector3(-50,1.3f,0);
-        else pos = new Vector3(50, 0, 0);
-        switch (character)
+
+        switch (NetworkManager.instance.player_1_Character)
         {
-            case Character.AKA: PhotonNetwork.Instantiate("A K A. AKA", pos,Quaternion.identity); break;
-            case Character.NoAlLa: PhotonNetwork.Instantiate("No al la", pos, Quaternion.identity); break;
-            case Character.Frogy: PhotonNetwork.Instantiate("Frogy", pos, Quaternion.identity); break;
-            case Character.Tusoteuthis: PhotonNetwork.Instantiate("Tusoteuthis", pos, Quaternion.identity); break;
+            case Character.AKA: Instantiate(animalPrefabs[0], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
+            case Character.NoAlLa: Instantiate(animalPrefabs[1], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
+            case Character.Frogy: Instantiate(animalPrefabs[2], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
+            case Character.Tusoteuthis: Instantiate(animalPrefabs[3], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
+        }
+        switch (NetworkManager.instance.player_2_Character)
+        {
+            case Character.AKA: Instantiate(animalPrefabs[0], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
+            case Character.NoAlLa: Instantiate(animalPrefabs[1], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
+            case Character.Frogy: Instantiate(animalPrefabs[2], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
+            case Character.Tusoteuthis: Instantiate(animalPrefabs[3], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
         }
     }
+
+    public void ImageSet()
+    {
+        left_CharacterImage.sprite = animalSprites[(int)NetworkManager.instance.player_1_Character];
+        right_CharacterImage.sprite = animalSprites[(int)NetworkManager.instance.player_2_Character];
+    }
+   
 }

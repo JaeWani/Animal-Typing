@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 public class TitleManager : MonoBehaviour
 {
@@ -11,6 +12,11 @@ public class TitleManager : MonoBehaviour
     [SerializeField] private Button startButton;
     [SerializeField] private Button ruleButton;
     [SerializeField] private Button quitButton;
+
+    [SerializeField] private Image rulePanel;
+
+    public List<Sprite> ruleSprites = new List<Sprite>();
+
 
     void Start()
     {
@@ -25,6 +31,7 @@ public class TitleManager : MonoBehaviour
 
         ruleButton.onClick.AddListener(() =>
         {
+            Rule();
             SoundManager.PlaySound("Button_Sound", 1, false);
         });
 
@@ -46,5 +53,22 @@ public class TitleManager : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         UIs.SetActive(isActive);
+    }
+    public void Rule()
+    {
+
+        StartCoroutine(rule());
+        IEnumerator rule()
+        {
+            rulePanel.GetComponent<RectTransform>().DOAnchorPosY(0, 1).SetEase(Ease.OutQuad);
+            yield return new WaitForSeconds(5);
+            rulePanel.sprite = ruleSprites[0];
+            yield return new WaitForSeconds(5);
+            rulePanel.sprite = ruleSprites[1];
+            yield return new WaitForSeconds(5);
+            rulePanel.sprite = ruleSprites[2];
+            yield return new WaitForSeconds(5);
+            rulePanel.GetComponent<RectTransform>().DOAnchorPosY(2000, 1).SetEase(Ease.OutQuad);
+        }
     }
 }

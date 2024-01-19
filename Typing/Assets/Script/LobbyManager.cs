@@ -31,9 +31,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     [SerializeField] private Image characterSelectImage;
 
+  
+
     [SerializeField] private List<Sprite> animalSprites = new List<Sprite>();
 
+    
     [SerializeField] private Character currentCharacter = Character.AKA;
+
 
     bool isJoinRoom = false;
     #endregion
@@ -46,13 +50,18 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         joinButton.onClick.AddListener(() =>
         {
             Connect();
-            NetworkManager.instance.currentCharacter = currentCharacter;
             SoundManager.PlaySound("Button_Sound", 1, false);
         });
         nickNameEnterButton.onClick.AddListener(() =>
         {
             NickNameEnter(nickNameInputField.text);
             SoundManager.PlaySound("Button_Sound", 1, false);
+
+            NetworkManager.instance.currentCharacter = currentCharacter;
+
+            var ht = new ExitGames.Client.Photon.Hashtable();
+            ht["icon"] = currentCharacter;
+            PhotonNetwork.LocalPlayer.SetCustomProperties(ht);
         });
 
         leftArrowButton.onClick.AddListener(() =>
@@ -64,7 +73,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
             characterSelectImage.sprite = animalSprites[(int)currentCharacter];
         });
 
-        rightArrowButton.onClick.AddListener(() => 
+        rightArrowButton.onClick.AddListener(() =>
         {
             int a = (int)currentCharacter;
             if (a + 1 > 3) a = 0;
@@ -109,7 +118,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         joinButton.interactable = false;
         connectionInfoText.text = "랜덤 방에 참가중입니다 !";
-
+        
         if (PhotonNetwork.IsConnected)
         {
             PhotonNetwork.JoinRandomRoom();
@@ -142,4 +151,5 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
     }
 
+    
 }
