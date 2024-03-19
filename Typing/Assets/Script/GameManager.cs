@@ -6,6 +6,7 @@ using Photon.Realtime;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public enum PlayerState
 {
@@ -34,8 +35,8 @@ public class GameManager : MonoBehaviourPun
     [SerializeField] private Text text_1, text_2;
 
     [Header("In Game System")]
-    private int Player_1_Score = 3;
-    private int Player_2_Score = 3;
+    public int Player_1_Score = 3;
+    public int Player_2_Score = 3;
 
     public Character character;
 
@@ -46,6 +47,10 @@ public class GameManager : MonoBehaviourPun
         {
             Player_1_Score = value;
             SetPlayer_1_HPBar();
+
+            var hashTable = new ExitGames.Client.Photon.Hashtable();
+            hashTable["Score"] = Player_1_Score;
+            PhotonNetwork.LocalPlayer.SetCustomProperties(hashTable);
         }
     }
     public int player_2_Score
@@ -55,6 +60,10 @@ public class GameManager : MonoBehaviourPun
         {
             Player_2_Score = value;
             SetPlayer_2_HPBar();
+
+            var hashTable = new ExitGames.Client.Photon.Hashtable();
+            hashTable["Score"] = Player_2_Score;
+            PhotonNetwork.LocalPlayer.SetCustomProperties(hashTable);
         }
     }
 
@@ -82,7 +91,7 @@ public class GameManager : MonoBehaviourPun
     [SerializeField] private Image left_CharacterImage;
     [SerializeField] private Image right_CharacterImage;
 
-   
+
 
     public List<Sprite> leftHPbarSprites = new List<Sprite>();
     public List<Sprite> rightHPbarSprites = new List<Sprite>();
@@ -124,13 +133,15 @@ public class GameManager : MonoBehaviourPun
         player_1_Score = 3;
         player_2_Score = 3;
 
+        if (PhotonNetwork.IsMasterClient) Debug.Log(PhotonNetwork.MasterClient.CustomProperties["Score"]);
+        foreach (var item in PhotonNetwork.PlayerList)
+        {
+            if (!PhotonNetwork.IsMasterClient) Debug.Log(item.CustomProperties["Score"]);
+        }
+
         photonView = GetComponent<PhotonView>();
 
         photonView.RPC("SetNickName", RpcTarget.All);
-
-        SetRandomAttackSentence(Random.Range(0, attackSentences.Count - 1));
-        SetRandomHealWord(Random.Range(0, healWords.Count - 1));
-        SetRandomInterference(Random.Range(0, interferenceWords.Count - 1));
 
         text_1.text = Player_1_Name;
         text_2.text = Player_2_Name;
@@ -139,13 +150,26 @@ public class GameManager : MonoBehaviourPun
         {
             SceneManager.LoadScene(1);
         });
-        if (PhotonNetwork.IsMasterClient) playerState = PlayerState.Master;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            playerState = PlayerState.Master;
+            NetworkManager.SetCustomPropertiesCR("MainSentence", "");
+            NetworkManager.SetCustomPropertiesCR("HealSentence", "");
+            NetworkManager.SetCustomPropertiesCR("InterferenceSentence", "");
+
+
+        }
         else playerState = PlayerState.User;
 
+        NetworkManager.SetCustomPropertiesLP("HP", 3);
 
         CreateCharacter();
         ImageSet();
         inputField.ActivateInputField();
+
+        NextAttackSentence();
+        NextHealWord();
+        NextInterference();
     }
 
     private void Update()
@@ -156,9 +180,8 @@ public class GameManager : MonoBehaviourPun
 
         MasterScoreText.text = player_1_Score.ToString();
         UserScoreText.text = player_2_Score.ToString();
+
         if (player_1_Score <= 0 || player_2_Score <= 0) photonView.RPC("GameOver", RpcTarget.All);
-
-
     }
 
     [PunRPC]
@@ -199,52 +222,53 @@ public class GameManager : MonoBehaviourPun
         if (instance.photonView.GetInstanceID() == instanceID) instance.photonView.RPC("SetRandomInterferenceWordRPC", RpcTarget.All, index);
     }
 
-    [PunRPC]
-    public void SetRandomAttackSentenceRPC(int index)
-    {
-        currentAttackSentence = attackSentences[index];
-    }
 
-    [PunRPC]
-    public void SetRandomHealWordRPC(int index)
-    {
-        currentHealWord = interferenceWords[index];
-    }
 
-    [PunRPC]
-    public void SetRandomInterferenceWordRPC(int index)
+    private void _NextAttackSentence()
     {
-        currentInterferenceWord = healWords[index];
-    }
+        Hashtable ht = NetworkManager.GetCustomPropertiesCR();
 
-    public static void NextAttackSentence(int index, int instanceID, PlayerState playerState)
-    {
-        SetRandomAttackSentence(index, instanceID);
-        instance.photonView.RPC("Attack", RpcTarget.Others);
-        instance.inputField.ActivateInputField();
-    }
-    public static void NextHealWord(int index, int instanceID, PlayerState playerState)
-    {
-        SetRandomHealWord(index, instanceID);
-        instance.photonView.RPC("Heal", RpcTarget.All, playerState);
-        instance.inputField.ActivateInputField();
-    }
-    public static void NextInterference(int index, int instanceID)
-    {
-        SetRandomInterference(index, instanceID);
-        instance.Interference();
-        instance.inputField.ActivateInputField();
-    }
+        string random = attackSentences[randomAttackValue];
+        ht["MainSentence"] = random;
+        Debug.Log((string)ht["MainSentence"]);
 
-    [PunRPC]
-    public void Attack()
-    {
-        SoundManager.PlaySound("Hit_Sound", 10, false);
-        CameraShake_(0.5f, 0.1f);
-        if (PhotonNetwork.IsMasterClient) player_1_Score--;
-        else player_2_Score--;
+        AttackSentenceText.text = random;
     }
+    public static void NextAttackSentence() => instance._NextAttackSentence();
 
+    private void _NextHealWord()
+    {
+        Hashtable ht = NetworkManager.GetCustomPropertiesCR();
+
+        string random = healWords[randomHealValue];
+        ht["HealSentence"] = random;
+        Debug.Log((string)ht["HealSentence"]);
+
+        healWordText.text = random;
+    }
+    public static void NextHealWord() => instance._NextHealWord();
+
+    private void _NextInterference()
+    {
+        Hashtable ht = NetworkManager.GetCustomPropertiesCR();
+        string random = interferenceWords[randomInterference];
+        ht["InterferenceSentence"] = random;
+        Debug.Log((string)ht["InterferenceSentence"]);
+
+        interferenceWordText.text = random;
+    }
+    public static void NextInterference() => instance._NextInterference();
+
+    private void _Attack()
+    {
+        // SoundManager.PlaySound("Hit_Sound", 10, false);
+        //CameraShake_(0.5f, 0.1f);
+        //if (PhotonNetwork.IsMasterClient) player_1_Score--;
+        // else player_2_Score--;
+
+        Debug.Log(PhotonNetwork.LocalPlayer.GetNext().NickName);
+    }
+    public static void Attack() => instance._Attack();
     [PunRPC]
     public void Heal(PlayerState playerState)
     {
@@ -364,5 +388,4 @@ public class GameManager : MonoBehaviourPun
         left_CharacterImage.sprite = animalSprites[(int)NetworkManager.instance.player_1_Character];
         right_CharacterImage.sprite = animalSprites[(int)NetworkManager.instance.player_2_Character];
     }
-   
 }

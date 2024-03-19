@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class Player : MonoBehaviour
 {
@@ -28,23 +29,20 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            if (inputField.text == GameManager.instance.currentAttackSentence)
+            Hashtable ht = NetworkManager.GetCustomPropertiesCR();
+            if (inputField.text == (string)ht["Sentence"])
             {
-                Debug.Log("°ø°Ý");
-                GameManager.NextAttackSentence(GameManager.instance.randomAttackValue, GameManager.instance.photonView.GetInstanceID(), currentState);
-
+                GameManager.NextAttackSentence();
                 inputField.text = null;
             }
-            else if (inputField.text == GameManager.instance.currentHealWord)
+            else if (inputField.text == (string)ht["HealSentence"])
             {
-                Debug.Log("Èú");
-                GameManager.NextHealWord(GameManager.instance.randomHealValue, GameManager.instance.photonView.GetInstanceID(), currentState);
+                GameManager.NextHealWord();
                 inputField.text = null;
             }
-            else if (inputField.text == GameManager.instance.currentInterferenceWord)
+            else if (inputField.text == (string)ht["InterferenceSentence"])
             {
-                Debug.Log("¹æÇØ");
-                GameManager.NextInterference(GameManager.instance.randomInterference, GameManager.instance.photonView.GetInstanceID());
+                GameManager.NextInterference();
                 inputField.text = null;
             }
         }

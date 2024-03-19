@@ -4,7 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
-
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
@@ -26,7 +26,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public Character player_1_Character;
     public Character player_2_Character;
-
     #endregion
 
     #region Unity_Function
@@ -68,7 +67,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("¼­¹ö ¿¬°á µÊ");
+        Debug.Log("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½");
+        PhotonNetwork.JoinLobby();
     }
     public override void OnJoinedRoom()
     {
@@ -83,17 +83,16 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     }
     public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
     {
-        Debug.Log("ÀÌ»õ³¢ ³ª°¨");
+        Debug.Log("ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
     }
     public override void OnLeftRoom()
     {
-        Debug.Log("¹æÀ» ³ª°¬½À´Ï´Ù.");
+        Debug.Log("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
     }
 
     public static void check() => instance.CheckPlayerCharacter();
     public void CheckPlayerCharacter()
     {
-
         NetworkManager.instance.player_1_Character = (Character)PhotonNetwork.MasterClient.CustomProperties["icon"];
         foreach (var item in PhotonNetwork.PlayerList)
         {
@@ -101,5 +100,39 @@ public class NetworkManager : MonoBehaviourPunCallbacks
                 NetworkManager.instance.player_2_Character = (Character)item.CustomProperties["icon"];
         }
     }
+
+    private void _SetCustomPropertiesCR(string name, string value)
+    {
+        Hashtable ht = new Hashtable();
+        ht[name] = value;
+
+        PhotonNetwork.CurrentRoom.SetCustomProperties(ht);
+    }
+    public static void SetCustomPropertiesCR(string name, string value) => instance._SetCustomPropertiesCR(name, value);
+
+    private void _SetCustomPropertiesLP(string name, int value)
+    {
+        Hashtable ht = new Hashtable();
+        ht[name] = value;
+
+        PhotonNetwork.LocalPlayer.SetCustomProperties(ht);
+    }
+    public static void SetCustomPropertiesLP(string name, int value) => instance._SetCustomPropertiesLP(name, value);
+  
+    private  Hashtable _GetCustomPropertiesCR()
+    {
+        Hashtable ht = PhotonNetwork.CurrentRoom.CustomProperties;
+
+        return  ht;
+    }
+    public static Hashtable GetCustomPropertiesCR() => instance._GetCustomPropertiesCR();
+
+    private  Hashtable _GetCustomPropertiesLP()
+    {
+        Hashtable ht = PhotonNetwork.LocalPlayer.CustomProperties;
+
+        return  ht;
+    }
+    public static Hashtable GetCustomPropertiesLP() => instance._GetCustomPropertiesCR();
     #endregion
 }
