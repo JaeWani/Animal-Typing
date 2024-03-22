@@ -30,17 +30,17 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return))
         {
             Hashtable ht = NetworkManager.GetCustomPropertiesCR();
-            if (inputField.text == (string)ht["Sentence"])
+            if (inputField.text == GameManager.instance.currentAttackSentence)
             {
                 GameManager.NextAttackSentence();
                 inputField.text = null;
             }
-            else if (inputField.text == (string)ht["HealSentence"])
+            else if (inputField.text == GameManager.instance.currentHealWord)
             {
                 GameManager.NextHealWord();
                 inputField.text = null;
             }
-            else if (inputField.text == (string)ht["InterferenceSentence"])
+            else if (inputField.text == GameManager.instance.currentInterferenceWord)
             {
                 GameManager.NextInterference();
                 inputField.text = null;

@@ -75,7 +75,13 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         Debug.Log("Room Joined!");
         check();
     }
-
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        GameManager.instance.currentAttackSentence = (string)PhotonNetwork.CurrentRoom.CustomProperties["MainSentence"];
+        GameManager.instance.currentHealWord = (string)PhotonNetwork.CurrentRoom.CustomProperties["HealSentence"];
+        GameManager.instance.currentInterferenceWord = (string)PhotonNetwork.CurrentRoom.CustomProperties["InterferenceSentence"];
+        Debug.Log("아이고난");
+    }
 
     public override void OnCreatedRoom()
     {
