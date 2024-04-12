@@ -82,6 +82,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         GameManager.instance.currentInterferenceWord = (string)PhotonNetwork.CurrentRoom.CustomProperties["InterferenceSentence"];
         Debug.Log("아이고난");
     }
+    public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player targetPlayer, Hashtable changedProps)
+    {
+        Debug.Log("Player Properties Value : ");
+        bool isNull = true;
+        foreach (var item in changedProps.Keys) if ((string)item == "HP") isNull = false;
+        if (targetPlayer.IsMasterClient && !isNull) GameManager.instance.Player_1_Score = (int)changedProps["HP"];
+        if (!targetPlayer.IsMasterClient && !isNull) GameManager.instance.Player_2_Score = (int)changedProps["HP"];
+    }
 
     public override void OnCreatedRoom()
     {
@@ -124,20 +132,20 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(ht);
     }
     public static void SetCustomPropertiesLP(string name, int value) => instance._SetCustomPropertiesLP(name, value);
-  
-    private  Hashtable _GetCustomPropertiesCR()
+
+    private Hashtable _GetCustomPropertiesCR()
     {
         Hashtable ht = PhotonNetwork.CurrentRoom.CustomProperties;
 
-        return  ht;
+        return ht;
     }
     public static Hashtable GetCustomPropertiesCR() => instance._GetCustomPropertiesCR();
 
-    private  Hashtable _GetCustomPropertiesLP()
+    private Hashtable _GetCustomPropertiesLP()
     {
         Hashtable ht = PhotonNetwork.LocalPlayer.CustomProperties;
 
-        return  ht;
+        return ht;
     }
     public static Hashtable GetCustomPropertiesLP() => instance._GetCustomPropertiesCR();
     #endregion

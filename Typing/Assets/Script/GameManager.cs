@@ -35,35 +35,27 @@ public class GameManager : MonoBehaviourPun
     [SerializeField] private Text text_1, text_2;
 
     [Header("In Game System")]
-    public int Player_1_Score = 3;
-    public int Player_2_Score = 3;
+    private int player_1_Score = 3;
+    private int player_2_Score = 3;
 
     public Character character;
 
-    public int player_1_Score
+    public int Player_1_Score
     {
-        get { return Player_1_Score; }
+        get { return player_1_Score; }
         set
         {
-            Player_1_Score = value;
+            player_1_Score = value;
             SetPlayer_1_HPBar();
-
-            var hashTable = new ExitGames.Client.Photon.Hashtable();
-            hashTable["Score"] = Player_1_Score;
-            PhotonNetwork.LocalPlayer.SetCustomProperties(hashTable);
         }
     }
-    public int player_2_Score
+    public int Player_2_Score
     {
-        get { return Player_2_Score; }
+        get { return player_2_Score; }
         set
         {
-            Player_2_Score = value;
+            player_2_Score = value;
             SetPlayer_2_HPBar();
-
-            var hashTable = new ExitGames.Client.Photon.Hashtable();
-            hashTable["Score"] = Player_2_Score;
-            PhotonNetwork.LocalPlayer.SetCustomProperties(hashTable);
         }
     }
 
@@ -269,7 +261,7 @@ public class GameManager : MonoBehaviourPun
         SoundManager.PlaySound("Hit_Sound", 1, false);
     }
 
-    public void Attack() => instance.photonView.RPC("_Attack", RpcTarget.Others);
+    public static void Attack() => instance.photonView.RPC("_Attack", RpcTarget.Others);
 
     private void _Heal()
     {
@@ -278,18 +270,8 @@ public class GameManager : MonoBehaviourPun
         ht["HP"] = hp + 1;
         PhotonNetwork.LocalPlayer.SetCustomProperties(ht);
 
-        if (PhotonNetwork.IsMasterClient)
-        {
-            SetPlayer_1_HPBar();
-            player_1_Score++;
-        }
-        else
-        {
-            SetPlayer_2_HPBar();
-            Player_2_Score++;
-        }
     }
-    public void Heal() => instance._Heal();
+    public static void Heal() => instance._Heal();
 
     public static void Interference()
     {
@@ -381,20 +363,27 @@ public class GameManager : MonoBehaviourPun
     }
     public void CreateCharacter()
     {
+        GameObject masterObj = null;
+        GameObject userObj = null;
+        if (PhotonNetwork.IsMasterClient)
+        {
+            switch (NetworkManager.instance.player_1_Character)
+            {
+                case Character.AKA: masterObj = PhotonNetwork.Instantiate("A K A. AKA", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+                case Character.NoAlLa: masterObj = PhotonNetwork.Instantiate("No al la", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+                case Character.Frogy: masterObj = PhotonNetwork.Instantiate("Frogy", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+                case Character.Tusoteuthis: masterObj = PhotonNetwork.Instantiate("Tusoteuthis", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+            }
+            switch (NetworkManager.instance.player_2_Character)
+            {
+                case Character.AKA: userObj = PhotonNetwork.Instantiate("A K A. AKA", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
+                case Character.NoAlLa: userObj = PhotonNetwork.Instantiate("No al la", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
+                case Character.Frogy: userObj = PhotonNetwork.Instantiate("Frogy", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
+                case Character.Tusoteuthis: userObj = PhotonNetwork.Instantiate("Tusoteuthis", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
+            }
 
-        switch (NetworkManager.instance.player_1_Character)
-        {
-            case Character.AKA: Instantiate(animalPrefabs[0], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
-            case Character.NoAlLa: Instantiate(animalPrefabs[1], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
-            case Character.Frogy: Instantiate(animalPrefabs[2], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
-            case Character.Tusoteuthis: Instantiate(animalPrefabs[3], new Vector3(-50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = true; break;
-        }
-        switch (NetworkManager.instance.player_2_Character)
-        {
-            case Character.AKA: Instantiate(animalPrefabs[0], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
-            case Character.NoAlLa: Instantiate(animalPrefabs[1], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
-            case Character.Frogy: Instantiate(animalPrefabs[2], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
-            case Character.Tusoteuthis: Instantiate(animalPrefabs[3], new Vector3(50, 1.3f, 0), Quaternion.identity).GetComponent<InGameCharacter>().isMaster = false; break;
+            masterObj.GetComponent<SpriteRenderer>().flipX = false;
+            userObj.GetComponent<SpriteRenderer>().flipX = true;
         }
     }
 

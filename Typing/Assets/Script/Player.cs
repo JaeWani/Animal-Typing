@@ -18,6 +18,8 @@ public class Player : MonoBehaviour
 
         if (PhotonNetwork.IsMasterClient) currentState = PlayerState.Master;
         else currentState = PlayerState.User;
+
+    
     }
 
     private void Update()
@@ -33,16 +35,19 @@ public class Player : MonoBehaviour
             if (inputField.text == GameManager.instance.currentAttackSentence)
             {
                 GameManager.NextAttackSentence();
+                GameManager.Attack();
                 inputField.text = null;
             }
             else if (inputField.text == GameManager.instance.currentHealWord)
             {
                 GameManager.NextHealWord();
+                GameManager.Heal();
                 inputField.text = null;
             }
             else if (inputField.text == GameManager.instance.currentInterferenceWord)
             {
                 GameManager.NextInterference();
+                GameManager.Interference();
                 inputField.text = null;
             }
         }

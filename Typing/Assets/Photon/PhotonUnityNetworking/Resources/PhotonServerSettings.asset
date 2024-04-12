@@ -54,6 +54,8 @@ MonoBehaviour:
   - GameOver
   - ChangeCharacterImage
   - CheckPlayerCharacter
+  - _Attack
+  - SetFlip
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
