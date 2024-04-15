@@ -11,23 +11,16 @@ public class InGameCharacter : MonoBehaviour
     PhotonView pv;
     public bool isMaster = false;
 
+    public PlayerState playerState;
+
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         pv = GetComponent<PhotonView>();
 
-        pv.RPC("FlipSet", RpcTarget.All);
-    }
+        float x = playerState == PlayerState.Master ? -5 : 5;
+        transform.DOMove(new Vector3(x, 2, 0), 0.5f);
 
-    private void FilpSet()
-    {
-        if (pv.IsMine)
-        {
-            if (PhotonNetwork.IsMasterClient) transform.DOLocalMoveX(-6, 1).SetEase(Ease.OutQuad);
-            else transform.DOLocalMoveX(6, 1).SetEase(Ease.OutQuad);
-
-            if (PhotonNetwork.IsMasterClient) spriteRenderer.flipX = false;
-            else spriteRenderer.flipX = true;
-        }
+        spriteRenderer.flipX = playerState == PlayerState.Master ? false : true;
     }
 }

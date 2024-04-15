@@ -365,26 +365,22 @@ public class GameManager : MonoBehaviourPun
     {
         GameObject masterObj = null;
         GameObject userObj = null;
-        if (PhotonNetwork.IsMasterClient)
+        switch (NetworkManager.instance.player_1_Character)
         {
-            switch (NetworkManager.instance.player_1_Character)
-            {
-                case Character.AKA: masterObj = PhotonNetwork.Instantiate("A K A. AKA", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
-                case Character.NoAlLa: masterObj = PhotonNetwork.Instantiate("No al la", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
-                case Character.Frogy: masterObj = PhotonNetwork.Instantiate("Frogy", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
-                case Character.Tusoteuthis: masterObj = PhotonNetwork.Instantiate("Tusoteuthis", new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
-            }
-            switch (NetworkManager.instance.player_2_Character)
-            {
-                case Character.AKA: userObj = PhotonNetwork.Instantiate("A K A. AKA", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
-                case Character.NoAlLa: userObj = PhotonNetwork.Instantiate("No al la", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
-                case Character.Frogy: userObj = PhotonNetwork.Instantiate("Frogy", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
-                case Character.Tusoteuthis: userObj = PhotonNetwork.Instantiate("Tusoteuthis", new Vector3(50, 1.3f, 0), Quaternion.identity); break;
-            }
-
-            masterObj.GetComponent<SpriteRenderer>().flipX = false;
-            userObj.GetComponent<SpriteRenderer>().flipX = true;
+            case Character.AKA: masterObj = Instantiate(animalPrefabs[0], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+            case Character.NoAlLa: masterObj = Instantiate(animalPrefabs[1], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+            case Character.Frogy: masterObj = Instantiate(animalPrefabs[2], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+            case Character.Tusoteuthis: masterObj = Instantiate(animalPrefabs[3], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
         }
+        switch (NetworkManager.instance.player_2_Character)
+        {
+            case Character.AKA: userObj = Instantiate(animalPrefabs[0], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+            case Character.NoAlLa: userObj = Instantiate(animalPrefabs[1], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+            case Character.Frogy: userObj = Instantiate(animalPrefabs[2], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+            case Character.Tusoteuthis: userObj = Instantiate(animalPrefabs[3], new Vector3(-50, 1.3f, 0), Quaternion.identity); break;
+        }
+        masterObj.GetComponent<InGameCharacter>().playerState = PlayerState.Master;
+        userObj.GetComponent<InGameCharacter>().playerState = PlayerState.User;
     }
 
     public void ImageSet()
